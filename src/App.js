@@ -1,4 +1,5 @@
 import React, { useState,useEffect, useCallback } from 'react';
+import AddMovies from './components/AddMovies'
 
 import MoviesList from './components/MoviesList';
 import './App.css';
@@ -47,7 +48,13 @@ setIsLoading(false);
 
 useEffect(()=>{
   fetchMovieHandler();
-}, [])
+},[fetchMovieHandler])
+
+function addMovieHandler(movie) {
+  console.log(movie);
+}
+
+
 
 const cancelRetryingHandler=()=>{
   console.log('cancelled')
@@ -70,6 +77,9 @@ if(isLoading){
   
   return (
     <React.Fragment>
+      <section>
+        <AddMovies onAddMovie={addMovieHandler}/>
+      </section>
       <section>
         <button onClick={fetchMovieHandler}>Fetch Movies</button>
       </section>
