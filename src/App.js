@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 
 import MoviesList from './components/MoviesList';
 import './App.css';
@@ -7,12 +7,21 @@ function App() {
 
   const[movies,setMovies]=useState([]);
   const[isLoading,setIsLoading]=useState(false);
+  const [error, setError]=useState(null);
+  const [cancel, setCancel]=useState(null);
 
   async function fetchMovieHandler(){
     setIsLoading(true);
-    const response=await fetch('https://swapi.dev/api/films/')
+    setError(null);
+    try{
+    const response=await fetch('https://swapi.dev/api/film/')
+
+    if(!response.ok){
+      throw new Error('Something went wrong....Retrying')
+    }
   const data=await response.json();
 
+ 
   const transformedMovies=data.results.map((movieData)=>{
     return{
       id:movieData.episode_id,
@@ -21,9 +30,38 @@ function App() {
       releaseDate: movieData.release_date,
     }
   })
+  console.log('fetching')
 setMovies(transformedMovies);  
 setIsLoading(false);
-  }
+  }catch(error) {
+setError(error.message);
+const cleanInterval=setInterval(async()=>{
+  await fetch("https://swapi.dev/api/film/")
+},5000)
+setCancel(cleanInterval)
+} 
+
+setIsLoading(false);
+}
+
+const cancelRetryingHandler=()=>{
+  console.log('cancelled')
+  clearInterval(cancel);
+}
+let content=<p>Found no movies.</p>
+
+if(movies.length>0){
+  content=<MoviesList movies={movies}/>
+}
+
+if(error){
+  content=<p>{error}</p>
+}
+
+if(isLoading){
+  content=<p>Loading...</p>
+}
+
   
   return (
     <React.Fragment>
@@ -31,8 +69,8 @@ setIsLoading(false);
         <button onClick={fetchMovieHandler}>Fetch Movies</button>
       </section>
       <section>
-        {!isLoading &&movies.length>0 && <MoviesList movies={movies} />}
-        {isLoading && <p>Loading... </p>}
+        {content}
+        {error && <button onClick={cancelRetryingHandler}>Cancel</button>}
       </section>
     </React.Fragment>
   );
