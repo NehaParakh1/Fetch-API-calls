@@ -16,29 +16,30 @@ const fetchMovieHandler=useCallback(async()=>{
     setIsLoading(true);
     setError(null);
     try{
-    const response=await fetch('https://swapi.dev/api/films/')
+    const response=await fetch('https://react-fetch-apicalls-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json')
 
     if(!response.ok){
       throw new Error('Something went wrong....Retrying')
     }
   const data=await response.json();
 
- 
-  const transformedMovies=data.results.map((movieData)=>{
-    return{
-      id:movieData.episode_id,
-      title: movieData.title,
-      openingText: movieData.opening_crawl,
-      releaseDate: movieData.release_date,
-    }
+const loadedMovies=[];
+
+for (const key in data) {
+  loadedMovies.push({
+    id:key,
+    title:data[key].title,
+    openingText:data[key].openingText,
+    releaseDate:data[key].releaseDate,
   })
-  console.log('fetching')
-setMovies(transformedMovies);  
+}
+ 
+setMovies(loadedMovies);  
 setIsLoading(false);
   }catch(error) {
 setError(error.message);
 const cleanInterval=setInterval(async()=>{
-  await fetch("https://swapi.dev/api/films/")
+  await fetch("https://react-fetch-apicalls-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json")
 },5000)
 setCancel(cleanInterval)
 } 
@@ -50,8 +51,16 @@ useEffect(()=>{
   fetchMovieHandler();
 },[fetchMovieHandler])
 
-function addMovieHandler(movie) {
-  console.log(movie);
+async function addMovieHandler(movie) {
+  const response= await fetch('https://react-fetch-apicalls-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json',{
+    method: 'POST',
+    body: JSON.stringify(movie),
+    headers:{
+      'Content-Type':'application/json'
+    }
+  })
+  const data=await response.json();
+  console.log(data);
 }
 
 
